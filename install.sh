@@ -30,9 +30,9 @@ sysctl -p
 
 echo 'set host name resolution'
 cat >> /etc/hosts <<EOF
-172.17.8.101 node1
-172.17.8.102 node2
-172.17.8.103 node3
+172.28.144.101 node1
+172.28.144.102 node2
+172.28.144.103 node3
 EOF
 
 cat /etc/hosts
@@ -115,7 +115,7 @@ echo 'create flannel config file...'
 
 cat > /etc/sysconfig/flanneld <<EOF
 # Flanneld configuration options
-FLANNEL_ETCD_ENDPOINTS="http://172.17.8.101:2379"
+FLANNEL_ETCD_ENDPOINTS="http://172.28.144.101:2379"
 FLANNEL_ETCD_PREFIX="/kube-centos/network"
 FLANNEL_OPTIONS="-iface=eth1"
 EOF
@@ -212,7 +212,7 @@ then
     echo "the admin role token is:"
     kubectl -n kube-system describe secret `kubectl -n kube-system get secret|grep admin-token|cut -d " " -f1`|grep "token:"|tr -s " "|cut -d " " -f2
     echo "login to dashboard with the above token"
-    echo https://172.17.8.101:`kubectl -n kube-system get svc kubernetes-dashboard -o=jsonpath='{.spec.ports[0].port}'`
+    echo https://172.28.144.101:`kubectl -n kube-system get svc kubernetes-dashboard -o=jsonpath='{.spec.ports[0].port}'`
     echo "install traefik ingress controller"
     kubectl apply -f /vagrant/addon/traefik-ingress/
 fi
