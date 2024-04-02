@@ -9,9 +9,11 @@ mv /etc/yum.repos.d/CentOS7-Base-163.repo /etc/yum.repos.d/CentOS-Base.repo
 # install  kmod and ceph-common for rook
 yum install -y wget curl conntrack-tools vim net-tools telnet tcpdump bind-utils socat ntp kmod ceph-common dos2unix
 kubernetes_release="/vagrant/kubernetes-server-linux-amd64.tar.gz"
+#k8s_version="1.16.14"
+k8s_version="1.14.8"
 # Download Kubernetes
 if [[ $(hostname) == "node1" ]] && [[ ! -f "$kubernetes_release" ]]; then
-    wget https://storage.googleapis.com/kubernetes-release/release/v1.16.14/kubernetes-server-linux-amd64.tar.gz -P /vagrant/
+    wget https://storage.googleapis.com/kubernetes-release/release/v$k8s_version/kubernetes-server-linux-amd64.tar.gz -P /vagrant/
 fi
 
 # enable ntp to sync time
@@ -28,11 +30,25 @@ net.ipv4.ip_forward=1
 EOF
 sysctl -p
 
+
+# #by mr 20240401
+echo 'set ipv4 address'
+cat >> /etc/sysconfig/network-scripts/ifcfg-eth0 <<EOF
+DEVICE="eth0"
+ONBOOT="yes"
+TYPE="Ethernet"
+IPADDR=$2
+NETMASK=255.255.255.0
+GATEWAY=192.168.99.1
+EOF
+systemctl restart network
+# #by mr end
+
 echo 'set host name resolution'
 cat >> /etc/hosts <<EOF
-172.28.144.101 node1
-172.28.144.102 node2
-172.28.144.103 node3
+192.168.99.101 node1
+192.168.99.102 node2
+192.168.99.103 node3
 EOF
 
 cat /etc/hosts
@@ -115,7 +131,7 @@ echo 'create flannel config file...'
 
 cat > /etc/sysconfig/flanneld <<EOF
 # Flanneld configuration options
-FLANNEL_ETCD_ENDPOINTS="http://172.28.144.101:2379"
+FLANNEL_ETCD_ENDPOINTS="http://192.168.99.101:2379"
 FLANNEL_ETCD_PREFIX="/kube-centos/network"
 FLANNEL_OPTIONS="-iface=eth1"
 EOF
@@ -212,7 +228,7 @@ then
     echo "the admin role token is:"
     kubectl -n kube-system describe secret `kubectl -n kube-system get secret|grep admin-token|cut -d " " -f1`|grep "token:"|tr -s " "|cut -d " " -f2
     echo "login to dashboard with the above token"
-    echo https://172.28.144.101:`kubectl -n kube-system get svc kubernetes-dashboard -o=jsonpath='{.spec.ports[0].port}'`
+    echo https://192.168.99.101:`kubectl -n kube-system get svc kubernetes-dashboard -o=jsonpath='{.spec.ports[0].port}'`
     echo "install traefik ingress controller"
     kubectl apply -f /vagrant/addon/traefik-ingress/
 fi

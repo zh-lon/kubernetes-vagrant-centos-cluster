@@ -4,3 +4,4 @@
 kubernetes
 *.box
 .idea/*
+.vs/*

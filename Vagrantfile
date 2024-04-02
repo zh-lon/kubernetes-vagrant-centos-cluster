@@ -12,15 +12,31 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant"
   $num_instances = 3
   # curl https://discovery.etcd.io/new?size=3
-  $etcd_cluster = "node1=http://172.28.144.101:2380"
+  $etcd_cluster = "node1=http://192.168.99.101:2380"
   (1..$num_instances).each do |i|
-    config.vm.define "node#{i}" do |node|
+    nodeID="node#{i}"
+    config.vm.define nodeID do |node|
       node.vm.box = "centos/7"
       #node.vbguest.installer_options = { allow_kernel_upgrade: true }
       node.vm.box_version = "1804.02"
-      node.vm.hostname = "node#{i}"
-      ip = "172.28.144.#{i+100}"
-      node.vm.network "private_network", ip: ip, bridge: "Default Switch"
+      node.vm.hostname = nodeID
+      ip = "192.168.99.#{i+100}"
+      node.vm.network "public_network", ip:ip , bridge: "k8s-Switch"
+      #node.vm.network "public_network", ip:ip , bridge: "Default Switch"
+      #https://github.com/hashicorp/vagrant/issues/8384
+      config.trigger.before :"VagrantPlugins::HyperV::Action::WaitForIPAddress", type: :action do |t|
+        t.only_on = nodeID
+        t.info = "-----------------------------------Configure IP for #{nodeID}----------------------------"
+        t.run = {
+        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -Username vagrant -Password vagrant -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 192.168.99.1 -DNSServer 114.114.114.114"
+        }
+      end
+
+
+      #node.vm.provision "shell", run: "always", inline: "echo set ipv4 temp"
+      #node.vm.provision "shell", run: "always", inline: "yum install net-tools -y"
+      #node.vm.provision "shell", run: "always", inline: "ifconfig eth0 192.168.99.#{i+100} netmask 255.255.250.0 up"
+      #node.vm.provision "shell",  run: "always",inline: "route add -net 0.0.0.0 netmask 0.0.0.0 gw 192.168.99.1 dev eth0"
       # node.vm.provider "virtualbox" do |vb|
       #   vb.memory = "3072"
       #   vb.cpus = 1
@@ -32,7 +48,7 @@ Vagrant.configure("2") do |config|
         h.vm_integration_services = {
           guest_service_interface: true
         }
-        h.vmname = "node#{i}"
+        h.vmname = nodeID
       end
       node.vm.provision "shell", path: "install.sh", args: [i, ip, $etcd_cluster]
     end
