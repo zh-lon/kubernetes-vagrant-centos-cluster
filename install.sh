@@ -112,7 +112,7 @@ EOF
 cat > /etc/etcd/etcd-init.sh<<EOF
 #!/bin/bash
 etcdctl mkdir /kube-centos/network
-etcdctl mk /kube-centos/network/config '{"Network":"172.33.0.0/16","SubnetLen":24,"Backend":{"Type":"host-gw"}}'
+etcdctl mk /kube-centos/network/config '{"Network":"172.33.0.0/16","SubnetLen":16,"Backend":{"Type":"host-gw"}}'
 EOF
     chmod +x /etc/etcd/etcd-init.sh
     echo 'start etcd...'
