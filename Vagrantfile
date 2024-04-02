@@ -24,31 +24,27 @@ Vagrant.configure("2") do |config|
       node.vm.network "public_network", ip:ip , bridge: "k8s-Switch"
       #node.vm.network "public_network", ip:ip , bridge: "Default Switch"
       #https://github.com/hashicorp/vagrant/issues/8384
-      config.trigger.before :"VagrantPlugins::HyperV::Action::WaitForIPAddress", type: :action do |t|
+      # 实际关键是配置正确的SSH连接地址，这个脚本在WaitForIPAddress后调用就可以， 所以用after脚本就行。 before执行未生效。 WaitForIPAddress首先会自动初始化ipv6地址。 //by mr
+      # config.trigger.before :"VagrantPlugins::HyperV::Action::WaitForIPAddress", type: :action do |t|
+      config.trigger.after :"VagrantPlugins::HyperV::Action::WaitForIPAddress", type: :action do |t|
         t.only_on = nodeID
         t.info = "-----------------------------------Configure IP for #{nodeID}----------------------------"
         t.run = {
-        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -Username vagrant -Password vagrant -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 192.168.99.1 -DNSServer 114.114.114.114"
+        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 192.168.99.1 -DNSServer 114.114.114.114"
         }
       end
 
-
-      #node.vm.provision "shell", run: "always", inline: "echo set ipv4 temp"
-      #node.vm.provision "shell", run: "always", inline: "yum install net-tools -y"
-      #node.vm.provision "shell", run: "always", inline: "ifconfig eth0 192.168.99.#{i+100} netmask 255.255.250.0 up"
-      #node.vm.provision "shell",  run: "always",inline: "route add -net 0.0.0.0 netmask 0.0.0.0 gw 192.168.99.1 dev eth0"
-      # node.vm.provider "virtualbox" do |vb|
-      #   vb.memory = "3072"
-      #   vb.cpus = 1
-      #   vb.name = "node#{i}"
-      # end
+      # https://developer.hashicorp.com/vagrant/docs/providers/hyperv/configuration
       node.vm.provider "hyperv" do |h|
-        h.memory = "3072"
+        h.memory = "2048"
+        h.maxmemory = "8192"
         h.cpus = 2
+        h.linked_clone = true
         h.vm_integration_services = {
           guest_service_interface: true
         }
         h.vmname = nodeID
+        h.ip_address_timeout = 240
       end
       node.vm.provision "shell", path: "install.sh", args: [i, ip, $etcd_cluster]
     end

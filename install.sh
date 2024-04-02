@@ -13,6 +13,7 @@ kubernetes_release="/vagrant/kubernetes-server-linux-amd64.tar.gz"
 k8s_version="1.14.8"
 # Download Kubernetes
 if [[ $(hostname) == "node1" ]] && [[ ! -f "$kubernetes_release" ]]; then
+    #wget https://storage.googleapis.com/kubernetes-release/release/v$k8s_version/kubernetes-server-linux-amd64.tar.gz -P /vagrant/
     wget https://storage.googleapis.com/kubernetes-release/release/v$k8s_version/kubernetes-server-linux-amd64.tar.gz -P /vagrant/
 fi
 
@@ -31,18 +32,18 @@ EOF
 sysctl -p
 
 
-# #by mr 20240401
-echo 'set ipv4 address'
-cat >> /etc/sysconfig/network-scripts/ifcfg-eth0 <<EOF
-DEVICE="eth0"
-ONBOOT="yes"
-TYPE="Ethernet"
-IPADDR=$2
-NETMASK=255.255.255.0
-GATEWAY=192.168.99.1
-EOF
-systemctl restart network
-# #by mr end
+# # #by mr 20240401
+# echo 'set ipv4 address'
+# cat >> /etc/sysconfig/network-scripts/ifcfg-eth0 <<EOF
+# DEVICE="eth0"
+# ONBOOT="yes"
+# TYPE="Ethernet"
+# IPADDR=$2
+# NETMASK=255.255.255.0
+# GATEWAY=192.168.99.1
+# EOF
+# systemctl restart network
+# # #by mr end
 
 echo 'set host name resolution'
 cat >> /etc/hosts <<EOF
@@ -53,9 +54,9 @@ EOF
 
 cat /etc/hosts
 
-echo 'set nameserver'
-echo "nameserver 8.8.8.8">/etc/resolv.conf
-cat /etc/resolv.conf
+# echo 'set nameserver'
+# echo "nameserver 8.8.8.8">/etc/resolv.conf
+# cat /etc/resolv.conf
 
 echo 'disable swap'
 swapoff -a
