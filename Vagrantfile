@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant"
   $num_instances = 3
   # curl https://discovery.etcd.io/new?size=3
-  $etcd_cluster = "node1=http://192.168.99.101:2380"
+  $etcd_cluster = "node1=http://172.17.8.101:2380"
   (1..$num_instances).each do |i|
     nodeID="node#{i}"
     config.vm.define nodeID do |node|
@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
       #node.vbguest.installer_options = { allow_kernel_upgrade: true }
       node.vm.box_version = "1804.02"
       node.vm.hostname = nodeID
-      ip = "192.168.99.#{i+100}"
+      ip = "172.17.8.#{i+100}"
       node.vm.network "public_network", ip:ip , bridge: "k8s-Switch"
       #node.vm.network "public_network", ip:ip , bridge: "Default Switch"
       #https://github.com/hashicorp/vagrant/issues/8384
@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
         t.only_on = nodeID
         t.info = "-----------------------------------Configure IP for #{nodeID}----------------------------"
         t.run = {
-        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 192.168.99.1 -DNSServer 114.114.114.114"
+        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 172.17.8.1 -DNSServer 114.114.114.114"
         }
       end
 

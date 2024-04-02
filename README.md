@@ -22,11 +22,11 @@ We will create a Kubernetes 1.15.0 cluster with 3 nodes which contains the compo
 
 | IP           | Hostname | Componets                                |
 | ------------ | -------- | ---------------------------------------- |
-| 192.168.99.101 | node1    | kube-apiserver, kube-controller-manager, kube-scheduler, etcd, kubelet, docker, flannel, dashboard |
-| 192.168.99.102 | node2    | kubelet, docker, flannel、traefik         |
-| 192.168.99.103 | node3    | kubelet, docker, flannel                 |
+| 172.17.8.101 | node1    | kube-apiserver, kube-controller-manager, kube-scheduler, etcd, kubelet, docker, flannel, dashboard |
+| 172.17.8.102 | node2    | kubelet, docker, flannel、traefik         |
+| 172.17.8.103 | node3    | kubelet, docker, flannel                 |
 
-The default setting will create the private network from 192.168.99.101 to 192.168.99.103 for nodes, and it will use the host's DHCP for the public IP.
+The default setting will create the private network from 172.17.8.101 to 172.17.8.103 for nodes, and it will use the host's DHCP for the public IP.
 
 The kubernetes service's VIP range is `10.254.0.0/16`.
 
@@ -171,7 +171,7 @@ kubectl get pods --namespace=kube-system
 
 **Kubernetes dashboard**
 
-Kubernetes dashboard URL: <https://192.168.99.101:8443>
+Kubernetes dashboard URL: <https://172.17.8.101:8443>
 
 Get the admin token:
 
@@ -216,7 +216,7 @@ kubectl apply -f /vagrant/addon/heapster/
 Append the following item to your local `/etc/hosts` file.
 
 ```ini
-192.168.99.102 grafana.jimmysong.io
+172.17.8.102 grafana.jimmysong.io
 ```
 
 Open the URL in browser: <http://grafana.jimmysong.io>
@@ -234,7 +234,7 @@ kubectl apply -f /vagrant/addon/traefik-ingress
 Append the following item to your  local file  `/etc/hosts`.
 
 ```ini
-192.168.99.102 traefik.jimmysong.io
+172.17.8.102 traefik.jimmysong.io
 ```
 
 Traefik UI URL: <http://traefik.jimmysong.io>
@@ -294,10 +294,10 @@ kubectl apply -n default -f /vagrant/yaml/istio-bookinfo/destination-rule-all.ya
 Add the following items into the file  `/etc/hosts` of your local machine.
 
 ```
-192.168.99.102 grafana.istio.jimmysong.io
-192.168.99.102 prometheus.istio.jimmysong.io
-192.168.99.102 servicegraph.istio.jimmysong.io
-192.168.99.102 jaeger-query.istio.jimmysong.io
+172.17.8.102 grafana.istio.jimmysong.io
+172.17.8.102 prometheus.istio.jimmysong.io
+172.17.8.102 servicegraph.istio.jimmysong.io
+172.17.8.102 jaeger-query.istio.jimmysong.io
 ```
 
 We can see the services from the following URLs.
@@ -307,7 +307,7 @@ We can see the services from the following URLs.
 | grafana      | http://grafana.istio.jimmysong.io                            |
 | servicegraph | <http://servicegraph.istio.jimmysong.io/dotviz>, <http://servicegraph.istio.jimmysong.io/graph>,<http://servicegraph.istio.jimmysong.io/force/forcegraph.html> |
 | tracing      | http://jaeger-query.istio.jimmysong.io                       |
-| productpage  | http://192.168.99.101:31380/productpage                        |
+| productpage  | http://172.17.8.101:31380/productpage                        |
 
 More detail see https://istio.io/docs/examples/bookinfo/
 
@@ -346,7 +346,7 @@ Run the following commands in your local machine.
 kubectl apply -n istio-system -f /vagrant/addon/kiali
 ```
 
-Kiali web: http://192.168.99.101:32439
+Kiali web: http://172.17.8.101:32439
 
 User/password: admin/admin
 
@@ -367,7 +367,7 @@ kubectl apply -f /vagrant/addon/weave-scope
 Add a record on your local  `/etc/hosts`.
 
 ```
-192.168.99.102 scope.weave.jimmysong.io
+172.17.8.102 scope.weave.jimmysong.io
 ```
 
 Now open your browser on http://scope.weave.jimmysong.io/
