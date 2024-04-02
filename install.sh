@@ -12,9 +12,10 @@ kubernetes_release="/vagrant/kubernetes-server-linux-amd64.tar.gz"
 #k8s_version="1.16.14"
 k8s_version="1.14.8"
 # Download Kubernetes
-if [[ $(hostname) == "node1" ]] && [[ ! -f "$kubernetes_release" ]]; then
+# if [[ $(hostname) == "node1" ]] && [[ ! -f "$kubernetes_release" ]]; then
+if [[ ! -f "$kubernetes_release" ]]; then  #hyper-v环境下共享路径有问题，没反向复制到宿主，始终复制
     #wget https://storage.googleapis.com/kubernetes-release/release/v$k8s_version/kubernetes-server-linux-amd64.tar.gz -P /vagrant/
-    wget https://storage.googleapis.com/kubernetes-release/release/v$k8s_version/kubernetes-server-linux-amd64.tar.gz -P /vagrant/
+    wget http://192.168.82.71:8083/mirror/v$k8s_version/kubernetes-server-linux-amd64.tar.gz -P /vagrant/
 fi
 
 # enable ntp to sync time
