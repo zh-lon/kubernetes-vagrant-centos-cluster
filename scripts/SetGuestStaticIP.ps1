@@ -38,7 +38,7 @@ $Msvm_GuestNetworkAdapterConfigurations = $Msvm_SyntheticEthernetPortSettingData
 Write-Output "Msvm_GuestNetworkAdapterConfigurations is $Msvm_GuestNetworkAdapterConfigurations"
 $Msvm_GuestNetworkAdapterConfiguration = ($Msvm_GuestNetworkAdapterConfigurations | % {$_})
 $ConfigOld = $Msvm_GuestNetworkAdapterConfiguration.GetText(1)
-Write-Output "Current Config is $ConfigOld"
+# Write-Output "Current Config is $ConfigOld"
 #Set the IP address and related information
 $Msvm_GuestNetworkAdapterConfiguration.DHCPEnabled = $false
 $Msvm_GuestNetworkAdapterConfiguration.IPAddresses = $IPAddress
@@ -50,7 +50,7 @@ $Path = $Msvm_ComputerSystem.Path
 # $Config = $Msvm_GuestNetworkAdapterConfiguration[0].GetText(1)
 $Config = $Msvm_GuestNetworkAdapterConfiguration.GetText(1)
 Write-Output "Msvm_ComputerSystem.Path is $Path"
-Write-Output "NewConfig is $Config"
+# Write-Output "NewConfig is $Config"
 
 #Set the IP address
 $Msvm_VirtualSystemManagementService.SetGuestNetworkAdapterConfiguration(
