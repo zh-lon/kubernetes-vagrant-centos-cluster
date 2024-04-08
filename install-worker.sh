@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# parms define
+# args: [i, $ip_start, $master_ip_start,$master_num_instances, $worker_ip_start,$worker_num_instances]
+# $1 第几个节点  $2 ip段 $3 ip开始  $4 节点数量 $5 ip开始  $6 节点数量
 # change time zone
 cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 timedatectl set-timezone Asia/Shanghai
@@ -32,25 +35,21 @@ net.ipv4.ip_forward=1
 EOF
 sysctl -p
 
-# # #by mr 20240401
-# echo 'set ipv4 address'
-# cat >> /etc/sysconfig/network-scripts/ifcfg-eth0 <<EOF
-# DEVICE="eth0"
-# ONBOOT="yes"
-# TYPE="Ethernet"
-# IPADDR=$2
-# NETMASK=255.255.255.0
-# GATEWAY=192.168.99.1
-# EOF
-# systemctl restart network
-# # #by mr end
-
 echo 'set host name resolution'
-cat >>/etc/hosts <<EOF
-192.168.99.101 node1
-192.168.99.102 node2
-192.168.99.103 node3
-EOF
+for ((i = 1; i <= $4; i++)); do
+    echo $2$(expr $3 + $i) master$i >>/etc/hosts
+done
+echo 'set host name resolution'
+for ((i = 1; i <= $6; i++)); do
+    echo $2$(expr $5 + $i) worker$i >>/etc/hosts
+done
+
+#修改按照数量自动添加
+#cat >>/etc/hosts <<EOF
+#192.168.99.101 node1
+#192.168.99.102 node2
+#192.168.99.103 node3
+#EOF
 
 cat /etc/hosts
 
@@ -87,42 +86,6 @@ cat >/etc/docker/daemon.json <<EOF
 }
 EOF
 
-if [[ $1 -eq 1 ]]; then
-    yum install -y etcd
-    #cp /vagrant/systemd/etcd.service /usr/lib/systemd/system/
-    cat >/etc/etcd/etcd.conf <<EOF
-#[Member]
-ETCD_DATA_DIR="/var/lib/etcd/default.etcd"
-ETCD_LISTEN_PEER_URLS="http://$2:2380"
-ETCD_LISTEN_CLIENT_URLS="http://$2:2379,http://localhost:2379"
-ETCD_NAME="node$1"
-
-#[Clustering]
-ETCD_INITIAL_ADVERTISE_PEER_URLS="http://$2:2380"
-ETCD_ADVERTISE_CLIENT_URLS="http://$2:2379"
-ETCD_INITIAL_CLUSTER="$3"
-ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
-ETCD_INITIAL_CLUSTER_STATE="new"
-EOF
-    cat /etc/etcd/etcd.conf
-    echo 'create network config in etcd'
-    cat >/etc/etcd/etcd-init.sh <<EOF
-#!/bin/bash
-etcdctl mkdir /kube-centos/network
-etcdctl mk /kube-centos/network/config '{"Network":"172.33.0.0/16","SubnetLen":24,"Backend":{"Type":"host-gw"}}'
-EOF
-    chmod +x /etc/etcd/etcd-init.sh
-    echo 'start etcd...'
-    systemctl daemon-reload
-    systemctl enable etcd
-    systemctl start etcd
-
-    echo 'create kubernetes ip range for flannel on 172.33.0.0/16'
-    /etc/etcd/etcd-init.sh
-    etcdctl cluster-health
-    etcdctl ls /
-fi
-
 echo 'install flannel...'
 yum install -y flannel
 
@@ -130,7 +93,7 @@ echo 'create flannel config file...'
 
 cat >/etc/sysconfig/flanneld <<EOF
 # Flanneld configuration options
-FLANNEL_ETCD_ENDPOINTS="http://192.168.99.101:2379"
+FLANNEL_ETCD_ENDPOINTS="http://$2$(expr $3 + 1):2379"
 FLANNEL_ETCD_PREFIX="/kube-centos/network"
 FLANNEL_OPTIONS="-iface=eth1"
 EOF
@@ -163,54 +126,16 @@ mkdir -p /var/lib/kubelet
 mkdir -p ~/.kube
 cp /vagrant/conf/admin.kubeconfig ~/.kube/config
 
-if [[ $1 -eq 1 ]]; then
-    echo "configure master and node1"
+echo "configure node$1"
+cp "/vagrant/node$1/*" /etc/kubernetes/
 
-    cp /vagrant/conf/apiserver /etc/kubernetes/
-    cp /vagrant/conf/config /etc/kubernetes/
-    cp /vagrant/conf/controller-manager /etc/kubernetes/
-    cp /vagrant/conf/scheduler /etc/kubernetes/
-    cp /vagrant/conf/scheduler.conf /etc/kubernetes/
-    cp /vagrant/node1/* /etc/kubernetes/
-
-    systemctl daemon-reload
-    systemctl enable kube-apiserver
-    systemctl start kube-apiserver
-
-    systemctl enable kube-controller-manager
-    systemctl start kube-controller-manager
-
-    systemctl enable kube-scheduler
-    systemctl start kube-scheduler
-
-    systemctl enable kubelet
-    systemctl start kubelet
-
-    systemctl enable kube-proxy
-    systemctl start kube-proxy
-fi
-
-if [[ $1 -eq 2 ]]; then
-    echo "configure node2"
-    cp /vagrant/node2/* /etc/kubernetes/
-
-    systemctl daemon-reload
-    systemctl enable kubelet
-    systemctl start kubelet
-    systemctl enable kube-proxy
-    systemctl start kube-proxy
-fi
+systemctl daemon-reload
+systemctl enable kubelet
+systemctl start kubelet
+systemctl enable kube-proxy
+systemctl start kube-proxy
 
 if [[ $1 -eq 3 ]]; then
-    echo "configure node3"
-    cp /vagrant/node3/* /etc/kubernetes/
-
-    systemctl daemon-reload
-
-    systemctl enable kubelet
-    systemctl start kubelet
-    systemctl enable kube-proxy
-    systemctl start kube-proxy
 
     echo "deploy coredns"
     cd /vagrant/addon/dns/
@@ -224,7 +149,7 @@ if [[ $1 -eq 3 ]]; then
     echo "the admin role token is:"
     kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-token | cut -d " " -f1) | grep "token:" | tr -s " " | cut -d " " -f2
     echo "login to dashboard with the above token"
-    echo https://192.168.99.101:$(kubectl -n kube-system get svc kubernetes-dashboard -o=jsonpath='{.spec.ports[0].port}')
+    echo https://$2$(expr $3 + 1):$(kubectl -n kube-system get svc kubernetes-dashboard -o=jsonpath='{.spec.ports[0].port}')
     echo "install traefik ingress controller"
     kubectl apply -f /vagrant/addon/traefik-ingress/
 fi

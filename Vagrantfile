@@ -53,7 +53,7 @@ Vagrant.configure("2") do |config|
         h.vmname = nodeID
         h.ip_address_timeout = 240
       end
-      node.vm.provision "shell", path: "install-master.sh", args: [i, ip, $etcd_cluster]
+      node.vm.provision "shell", path: "install-master.sh", args: [i, $ip_start, $master_ip_start,$master_num_instances, $worker_ip_start,$worker_num_instances]
     end
     #master安装结束    worker安装开始------------------------------------------------
     (1..$worker_num_instances).each do |i|
@@ -89,7 +89,7 @@ Vagrant.configure("2") do |config|
           h.vmname = nodeID
           h.ip_address_timeout = 240
         end
-        node.vm.provision "shell", path: "install-worker.sh", args: [i, ip, $etcd_cluster]
+        node.vm.provision "shell", path: "install-worker.sh", args: [i, $ip_start, $master_ip_start,$master_num_instances, $worker_ip_start,$worker_num_instances]
       end
     end
     #worker安装结束------------------------------------------------
