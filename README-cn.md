@@ -28,9 +28,9 @@
 
 | IP           | 主机名   | 组件                                       |
 | ------------ | ----- | ---------------------------------------- |
-| 192.168.99.101 | node1 | kube-apiserver、kube-controller-manager、kube-scheduler、etcd、kubelet、docker、flannel、dashboard |
-| 192.168.99.102 | node2 | kubelet、docker、flannel、traefik           |
-| 192.168.99.103 | node3 | kubelet、docker、flannel                   |
+| 10.129.0.21 | node1 | kube-apiserver、kube-controller-manager、kube-scheduler、etcd、kubelet、docker、flannel、dashboard |
+| 10.129.0.22 | node2 | kubelet、docker、flannel、traefik           |
+| 10.129.0.23 | node3 | kubelet、docker、flannel                   |
 
 **注意**：以上的IP、主机名和组件都是固定在这些节点的，即使销毁后下次使用vagrant重建依然保持不变。
 
@@ -183,7 +183,7 @@ kubectl get nodes
 
 **Kubernetes dashboard**
 
-还可以直接通过dashboard UI来访问：https://192.168.99.101:8443
+还可以直接通过dashboard UI来访问：https://10.129.0.21:8443
 
 可以在本地执行以下命令获取token的值（需要提前安装kubectl）：
 
@@ -232,7 +232,7 @@ kubectl apply -f addon/heapster/
 使用Ingress方式暴露的服务，在本地`/etc/hosts`中增加一条配置：
 
 ```ini
-192.168.99.102 grafana.jimmysong.io
+10.129.0.22 grafana.jimmysong.io
 ```
 
 访问Grafana：<http://grafana.jimmysong.io>
@@ -250,7 +250,7 @@ kubectl apply -f addon/traefik-ingress
 在本地`/etc/hosts`中增加一条配置：
 
 ```ini
-192.168.99.102 traefik.jimmysong.io
+10.129.0.22 traefik.jimmysong.io
 ```
 
 访问Traefik UI：<http://traefik.jimmysong.io>
@@ -310,10 +310,10 @@ kubectl apply -n default -f yaml/istio-bookinfo/destination-rule-all.yaml
 在您自己的本地主机的`/etc/hosts`文件中增加如下配置项。
 
 ```
-192.168.99.102 grafana.istio.jimmysong.io
-192.168.99.102 prometheus.istio.jimmysong.io
-192.168.99.102 servicegraph.istio.jimmysong.io
-192.168.99.102 jaeger-query.istio.jimmysong.io
+10.129.0.22 grafana.istio.jimmysong.io
+10.129.0.22 prometheus.istio.jimmysong.io
+10.129.0.22 servicegraph.istio.jimmysong.io
+10.129.0.22 jaeger-query.istio.jimmysong.io
 ```
 
 我们可以通过下面的URL地址访问以上的服务。
@@ -323,7 +323,7 @@ kubectl apply -n default -f yaml/istio-bookinfo/destination-rule-all.yaml
 | grafana      | http://grafana.istio.jimmysong.io                            |
 | servicegraph | <http://servicegraph.istio.jimmysong.io/dotviz>, <http://servicegraph.istio.jimmysong.io/graph>,<http://servicegraph.istio.jimmysong.io/force/forcegraph.html> |
 | tracing      | http://jaeger-query.istio.jimmysong.io                       |
-| productpage  | http://192.168.99.101:31380/productpage                        |
+| productpage  | http://10.129.0.21:31380/productpage                        |
 
 详细信息请参阅：https://istio.io/zh/docs/examples/bookinfo/
 
@@ -360,7 +360,7 @@ Kiali是一个用于提供Istio service mesh观察性的项目，更多信息请
 kubectl apply -n istio-system -f addon/kiali
 ```
 
-Kiali web地址：http://192.168.99.101:32439
+Kiali web地址：http://10.129.0.21:32439
 
 用户名/密码：admin/admin
 
@@ -381,7 +381,7 @@ kubectl apply -f addon/weave-scope
 在本地的`/etc/hosts`下增加一条记录。
 
 ```
-192.168.99.102 scope.weave.jimmysong.io
+10.129.0.22 scope.weave.jimmysong.io
 ```
 
 现在打开浏览器，访问http://scope.weave.jimmysong.io/

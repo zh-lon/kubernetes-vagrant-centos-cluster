@@ -38,23 +38,35 @@ $Msvm_GuestNetworkAdapterConfigurations = $Msvm_SyntheticEthernetPortSettingData
 Write-Output "Msvm_GuestNetworkAdapterConfigurations is $Msvm_GuestNetworkAdapterConfigurations"
 $Msvm_GuestNetworkAdapterConfiguration = ($Msvm_GuestNetworkAdapterConfigurations | % {$_})
 $ConfigOld = $Msvm_GuestNetworkAdapterConfiguration.GetText(1)
-# Write-Output "Current Config is $ConfigOld"
+Write-Output "Current Config is $ConfigOld"
 #Set the IP address and related information
 $Msvm_GuestNetworkAdapterConfiguration.DHCPEnabled = $false
-$Msvm_GuestNetworkAdapterConfiguration.IPAddresses = $IPAddress
-$Msvm_GuestNetworkAdapterConfiguration.Subnets = $NetMask
+$Msvm_GuestNetworkAdapterConfiguration.IPAddresses += $IPAddress  # 保留原有配置，增加新地址，下同。
+$Msvm_GuestNetworkAdapterConfiguration.Subnets = $NetMask #
 $Msvm_GuestNetworkAdapterConfiguration.DefaultGateways = $DefaultGateway
 $Msvm_GuestNetworkAdapterConfiguration.DNSServers = $DNSServer
+$Msvm_GuestNetworkAdapterConfiguration.ProtocolIFType = 4096 #  4096  IPv4 Only, 4097 IPv6 Only, 4098 IPv4/v6
 
 $Path = $Msvm_ComputerSystem.Path
 # $Config = $Msvm_GuestNetworkAdapterConfiguration[0].GetText(1)
 $Config = $Msvm_GuestNetworkAdapterConfiguration.GetText(1)
 Write-Output "Msvm_ComputerSystem.Path is $Path"
-# Write-Output "NewConfig is $Config"
+Write-Output "NewConfig is $Config"
+
 
 #Set the IP address
-$Msvm_VirtualSystemManagementService.SetGuestNetworkAdapterConfiguration(
+$r=$Msvm_VirtualSystemManagementService.SetGuestNetworkAdapterConfiguration(
     $Msvm_ComputerSystem.Path,
-   $Config)
+   $Config
+   )
+Write-Output $r
+if ($r.ReturnValue -eq 4096) {
+    $jobFilter=(($r.Job -split ":")[1] -split "\.")[1]
+    Write-Output "jobFilter is $jobFilter"
+    $job=Get-WmiObject -Namespace root\virtualization\v2 -Class Msvm_ConcreteJob -Filter $jobFilter
+    Write-Output $job
+    #$job.RequestStateChange(4,10000)
+}
+
 
 #modified from https://learn.microsoft.com/en-us/archive/blogs/taylorb/setting-guest-ip-addresses-from-the-host
