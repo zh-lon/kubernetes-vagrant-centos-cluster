@@ -127,7 +127,39 @@ mkdir -p ~/.kube
 cp /vagrant/conf/admin.kubeconfig ~/.kube/config
 
 echo "configure node$1"
-cp "/vagrant/node$1/*" /etc/kubernetes/
+#cp "/vagrant/node$1/*" /etc/kubernetes/
+cat >/etc/kubernetes/kubelet <<EOF
+###
+## kubernetes kubelet (minion) config
+#
+## The address for the info server to serve on (set to 0.0.0.0 or "" for all interfaces)
+KUBELET_ADDRESS="--address=$2$(expr $5 + $1)"
+#
+## The port for the info server to serve on
+#KUBELET_PORT="--port=10250"
+#
+## You may leave this blank to use the actual hostname
+KUBELET_HOSTNAME="--hostname-override=worker$1"
+#
+## location of the api-server
+## COMMENT THIS ON KUBERNETES 1.8+
+# KUBELET_API_SERVER="--api-servers=http://172.20.0.113:8080"
+#
+## pod infrastructure container
+KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=registry.aliyuncs.com/google_containers/pause:3.1"
+#
+## Add your own!
+KUBELET_ARGS="--runtime-cgroups=/systemd/system.slice --kubelet-cgroups=/systemd/system.slice --cgroup-driver=systemd --cluster-dns=10.254.0.2 --bootstrap-kubeconfig=/etc/kubernetes/bootstrap.kubeconfig --kubeconfig=/etc/kubernetes/kubelet.kubeconfig --cert-dir=/etc/kubernetes/ssl --cluster-domain=cluster.local --hairpin-mode promiscuous-bridge --serialize-image-pulls=false"
+
+EOF
+
+cat >/etc/kubernetes/proxy <<EOF
+###
+# kubernetes proxy config
+# default config should be adequate
+# Add your own!
+KUBE_PROXY_ARGS="--bind-address=$2$(expr $5 + $1) --kubeconfig=/etc/kubernetes/kube-proxy.kubeconfig --cluster-cidr=10.254.0.0/16 --hostname-override=worker$1"
+EOF
 
 systemctl daemon-reload
 systemctl enable kubelet
