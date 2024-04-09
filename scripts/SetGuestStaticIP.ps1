@@ -38,20 +38,20 @@ $Msvm_GuestNetworkAdapterConfigurations = $Msvm_SyntheticEthernetPortSettingData
 Write-Output "Msvm_GuestNetworkAdapterConfigurations is $Msvm_GuestNetworkAdapterConfigurations"
 $Msvm_GuestNetworkAdapterConfiguration = ($Msvm_GuestNetworkAdapterConfigurations | % {$_})
 $ConfigOld = $Msvm_GuestNetworkAdapterConfiguration.GetText(1)
-Write-Output "Current Config is $ConfigOld"
+# Write-Output "Current Config is $ConfigOld"
 #Set the IP address and related information
 $Msvm_GuestNetworkAdapterConfiguration.DHCPEnabled = $false
-$Msvm_GuestNetworkAdapterConfiguration.IPAddresses += $IPAddress  # 保留原有配置，增加新地址，下同。
-$Msvm_GuestNetworkAdapterConfiguration.Subnets = $NetMask #
+$Msvm_GuestNetworkAdapterConfiguration.IPAddresses = @($IPAddress)#+$Msvm_GuestNetworkAdapterConfiguration.IPAddresses  # 保留原有配置，增加新地址，下同。
+$Msvm_GuestNetworkAdapterConfiguration.Subnets = @($NetMask) # + $Msvm_GuestNetworkAdapterConfiguration.Subnets #
 $Msvm_GuestNetworkAdapterConfiguration.DefaultGateways = $DefaultGateway
 $Msvm_GuestNetworkAdapterConfiguration.DNSServers = $DNSServer
-$Msvm_GuestNetworkAdapterConfiguration.ProtocolIFType = 4096 #  4096  IPv4 Only, 4097 IPv6 Only, 4098 IPv4/v6
+$Msvm_GuestNetworkAdapterConfiguration.ProtocolIFType = 4098 #  4096  IPv4 Only, 4097 IPv6 Only, 4098 IPv4/v6
 
 $Path = $Msvm_ComputerSystem.Path
 # $Config = $Msvm_GuestNetworkAdapterConfiguration[0].GetText(1)
 $Config = $Msvm_GuestNetworkAdapterConfiguration.GetText(1)
 Write-Output "Msvm_ComputerSystem.Path is $Path"
-Write-Output "NewConfig is $Config"
+# Write-Output "NewConfig is $Config"
 
 
 #Set the IP address
