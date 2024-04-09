@@ -10,6 +10,7 @@ Vagrant.configure("2") do |config|
   #  vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
   #end
   config.vm.synced_folder ".", "/vagrant"
+  #config.vm.synced_folder ".", "/vagrant",type: "smb", mount_options: ["vers=1.0,username=mr"]
   $num_instances = 3
   # curl https://discovery.etcd.io/new?size=3
   $etcd_cluster = "node1=http://10.129.0.21:2380"
