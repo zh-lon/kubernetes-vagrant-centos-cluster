@@ -30,7 +30,7 @@ Vagrant.configure("2") do |config|
         t.only_on = nodeID
         t.info = "-----------------------------------Configure IP for #{nodeID}----------------------------"
         t.run = {
-        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 24 -DefaultGateway 10.129.0.254 -DNSServer 10.33.250.1"
+        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 10.129.0.254 -DNSServer 10.33.250.1"
         }
       end
 
