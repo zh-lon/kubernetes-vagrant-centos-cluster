@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
   # curl https://discovery.etcd.io/new?size=3
   #$etcd_cluster = "node1=http://192.168.99.101:2380"
   # 定义IP地址段
-  $ip_start = "192.168.99."
+  $ip_start = "10.129.0."
   #master和worker的ip开始
   $master_ip_start = 19
   $worker_ip_start = 23
@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
       node.vm.box_version = "1804.02"
       node.vm.hostname = nodeID
       ip = $ip_start + "#{i+$master_ip_start}"
-      node.vm.network "public_network", ip:ip , bridge: "k8s-Switch"
+      node.vm.network "public_network", ip:ip , bridge: "VLAN1-V"
       #node.vm.network "public_network", ip:ip , bridge: "Default Switch"
       #https://github.com/hashicorp/vagrant/issues/8384
       # 实际关键是配置正确的SSH连接地址，这个脚本在WaitForIPAddress后调用就可以， 所以用after脚本就行。 before执行未生效。 WaitForIPAddress首先会自动初始化ipv6地址。 //by mr
@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
         t.only_on = nodeID
         t.info = "-----------------------------------Configure IP for #{nodeID}----------------------------"
         t.run = {
-        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 192.168.99.1 -DNSServer 114.114.114.114"
+        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 10.129.0.254 -DNSServer 10.33.250.1"
         }
       end
 
@@ -46,6 +46,7 @@ Vagrant.configure("2") do |config|
         h.memory = "2048"
         h.maxmemory = "8192"
         h.cpus = 2
+        h.vlan_id = 129
         h.linked_clone = true
         h.vm_integration_services = {
           guest_service_interface: true

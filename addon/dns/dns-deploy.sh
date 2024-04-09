@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Deploys CoreDNS to a cluster currently running Kube-DNS.
 
