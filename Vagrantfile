@@ -9,8 +9,8 @@ Vagrant.configure("2") do |config|
   #config.vm.provider 'hyperv' do |vb|
   #  vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
   #end
-  #config.vm.synced_folder ".", "/vagrant",type: "rsync",rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "--delete", "-z"]
-  config.vm.synced_folder ".", "/vagrant",type: "smb", mount_options: ["vers=1.0,username=mr"]
+  config.vm.synced_folder ".", "/vagrant"
+  #config.vm.synced_folder ".", "/vagrant",type: "smb", mount_options: ["vers=1.0,username=mr"]
   $num_instances = 3
   # curl https://discovery.etcd.io/new?size=3
   $etcd_cluster = "node1=http://192.168.99.101:2380"
