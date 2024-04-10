@@ -13,9 +13,9 @@ Vagrant.configure("2") do |config|
   $master_num_instances = 3
   $worker_num_instances = 4
   # curl https://discovery.etcd.io/new?size=3
-  #$etcd_cluster = "node1=http://192.168.99.101:2380"
+  #$etcd_cluster = "node1=http://10.129.0.101:2380"
   # 定义IP地址段
-  $ip_start = "192.168.99."
+  $ip_start = "10.129.0."
   #master和worker的ip开始
   $master_ip_start = 19
   $worker_ip_start = 23
@@ -37,13 +37,13 @@ Vagrant.configure("2") do |config|
         t.only_on = nodeID
         t.info = "-----------------------------------Configure IP for #{nodeID}----------------------------"
         t.run = {
-        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 192.168.99.1 -DNSServer 114.114.114.114"
+        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 10.129.0.1 -DNSServer 114.114.114.114"
         }
       end
 
       # https://developer.hashicorp.com/vagrant/docs/providers/hyperv/configuration
       node.vm.provider "hyperv" do |h|
-        h.memory = "2048"
+        h.memory = "4096"
         h.maxmemory = "8192"
         h.cpus = 2
         h.linked_clone = true
@@ -75,16 +75,16 @@ Vagrant.configure("2") do |config|
         t.only_on = nodeID
         t.info = "-----------------------------------Configure IP for #{nodeID}----------------------------"
         t.run = {
-        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 192.168.99.1 -DNSServer 114.114.114.114"
+        inline: "scripts/SetGuestStaticIP.ps1 -VirtualMachine #{nodeID} -IPAddress #{ip} -NetMask 255.255.255.0 -DefaultGateway 10.129.0.1 -DNSServer 114.114.114.114"
         }
       end
 
       # https://developer.hashicorp.com/vagrant/docs/providers/hyperv/configuration
       node.vm.provider "hyperv" do |h|
-        h.memory = "2048"
-        h.maxmemory = "8192"
+        h.memory = "16384"
+        h.maxmemory = "32768"
         h.vlan_id = 129
-        h.cpus = 2
+        h.cpus = 8
         h.linked_clone = true
         h.vm_integration_services = {
           guest_service_interface: true

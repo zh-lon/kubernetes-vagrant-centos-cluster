@@ -47,7 +47,7 @@ sysctl -p
 # TYPE="Ethernet"
 # IPADDR=$2
 # NETMASK=255.255.255.0
-# GATEWAY=192.168.99.1
+# GATEWAY=10.129.0.1
 # EOF
 # systemctl restart network
 # # #by mr end
@@ -63,9 +63,9 @@ done
 
 #修改按照数量自动添加
 #cat >>/etc/hosts <<EOF
-#192.168.99.101 node1
-#192.168.99.102 node2
-#192.168.99.103 node3
+#10.129.0.101 node1
+#10.129.0.102 node2
+#10.129.0.103 node3
 #EOF
 
 cat /etc/hosts
