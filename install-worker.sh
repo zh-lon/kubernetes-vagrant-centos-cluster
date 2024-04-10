@@ -11,6 +11,10 @@ mv /etc/yum.repos.d/CentOS7-Base-163.repo /etc/yum.repos.d/CentOS-Base.repo
 # using socat to port forward in helm tiller
 # install  kmod and ceph-common for rook
 yum install -y wget curl conntrack-tools vim net-tools telnet tcpdump bind-utils socat ntp kmod ceph-common dos2unix
+yum install -y nfs-utils
+echo 10.129.0.12:/home/nfs /mnt nfs rw,sync 0 0 >>/etc/fstab
+mount -a
+ls /mnt
 kubernetes_release="/vagrant/kubernetes-server-linux-amd64.tar.gz"
 #k8s_version="1.16.14"
 k8s_version="1.14.8"
